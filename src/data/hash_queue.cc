@@ -149,7 +149,7 @@ HashQueue::clear() {
 
 void
 HashQueue::work() {
-  std::lock_guard lk(m_done_chunks_lock);
+  std::lock_guard<std::mutex> lk(m_done_chunks_lock);
 
   while (!m_done_chunks.empty()) {
     HashChunk* hash_chunk = m_done_chunks.begin()->first;
@@ -184,7 +184,7 @@ HashQueue::work() {
 
 void
 HashQueue::chunk_done(HashChunk* hash_chunk, const HashString& hash_value) {
-  std::lock_guard lk(m_done_chunks_lock);
+  std::lock_guard<std::mutex> lk(m_done_chunks_lock);
 
   m_done_chunks[hash_chunk] = hash_value;
   m_slot_has_work(m_done_chunks.empty());

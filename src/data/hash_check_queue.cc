@@ -15,7 +15,7 @@ HashCheckQueue::push_back(HashChunk* hash_chunk) {
       !hash_chunk->chunk()->is_blocking())
     throw internal_error("Invalid hash chunk passed to HashCheckQueue.");
 
-  std::lock_guard lk(m_lock);
+  std::lock_guard<std::mutex> lk(m_lock);
 
   // Set blocking...(? this needs to be possible to do after getting
   // the chunk) When doing this make sure we verify that the handle is
@@ -44,7 +44,7 @@ HashCheckQueue::push_back(HashChunk* hash_chunk) {
 
 bool
 HashCheckQueue::remove(HashChunk* hash_chunk) {
-  std::lock_guard lk(m_lock);
+  std::lock_guard<std::mutex> lk(m_lock);
 
   bool result;
   auto itr = std::find(begin(), end(), hash_chunk);
