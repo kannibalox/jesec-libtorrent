@@ -45,6 +45,10 @@ public:
            m_errno == std::errc::not_a_directory ||
            m_errno == std::errc::permission_denied;
   }
+  error_number(const error_number&) = default;
+  error_number(error_number&&) = default;
+  error_number& operator=(const error_number&) = default;
+  error_number& operator=(error_number&) = default;
 
   static error_number current() {
     return static_cast<std::errc>(errno);
@@ -61,7 +65,7 @@ public:
   }
 
 private:
-  std::errc m_errno{ 0 };
+  std::errc m_errno;
 };
 
 } // namespace utils
