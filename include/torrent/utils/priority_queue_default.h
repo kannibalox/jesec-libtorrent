@@ -130,10 +130,11 @@ priority_queue_erase(priority_queue_default* queue, priority_item* item) {
     throw torrent::internal_error(
       "priority_queue_erase(...) could not find item in queue.");
 
-  if (queue->find(item) != queue->end())
-    throw torrent::internal_error(
-      "priority_queue_erase(...) item still in queue.");
-}
+  // if (queue->find(item) != queue->end())
+  //   throw torrent::internal_error(
+  //     "priority_queue_erase(...) item still in queue.");
+
+  }
 
 } // namespace utils
 } // namespace torrent
