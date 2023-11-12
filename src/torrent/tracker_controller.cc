@@ -38,8 +38,7 @@ TrackerController::update_timeout(uint32_t seconds_to_next) {
     next_timeout = (cachedTime + utils::timer::from_seconds(seconds_to_next))
                      .round_seconds();
 
-  priority_queue_erase(&taskScheduler, &m_private->task_timeout);
-  priority_queue_insert(&taskScheduler, &m_private->task_timeout, next_timeout);
+  priority_queue_upsert(&taskScheduler, &m_private->task_timeout, next_timeout);
 }
 
 inline int
@@ -121,8 +120,7 @@ TrackerController::scrape_request(uint32_t seconds_to_request) {
     next_timeout = (cachedTime + utils::timer::from_seconds(seconds_to_request))
                      .round_seconds();
 
-  priority_queue_erase(&taskScheduler, &m_private->task_scrape);
-  priority_queue_insert(&taskScheduler, &m_private->task_scrape, next_timeout);
+  priority_queue_upsert(&taskScheduler, &m_private->task_scrape, next_timeout);
 }
 
 // The send_*_event() functions tries to ensure the relevant trackers

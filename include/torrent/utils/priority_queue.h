@@ -41,6 +41,10 @@ public:
     return base_type::front();
   }
 
+  void make_heap() {
+    std::make_heap(begin(), end(), m_compare);
+  }
+
   void pop() {
     std::pop_heap(begin(), end(), m_compare);
     base_type::pop_back();
@@ -69,12 +73,8 @@ public:
     return true;
   }
 
-  // Removes 'itr' from the queue. This assumes 'itr' has been
-  // modified such that it has a higher priority than any other
-  // element in the queue.
+  // Removes 'itr' from the queue.
   void erase(iterator itr) {
-    //     std::push_heap(begin(), ++itr, m_compare);
-    //     pop();
     base_type::erase(itr);
     std::make_heap(begin(), end(), m_compare);
   }

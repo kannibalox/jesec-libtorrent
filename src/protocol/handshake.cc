@@ -603,8 +603,7 @@ Handshake::read_peer() {
   manager->poll()->insert_write(this);
 
   // Give some extra time for reading/writing the bitfield.
-  priority_queue_erase(&taskScheduler, &m_taskTimeout);
-  priority_queue_insert(
+  priority_queue_upsert(
     &taskScheduler,
     &m_taskTimeout,
     (cachedTime + utils::timer::from_seconds(120)).round_seconds());

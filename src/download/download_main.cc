@@ -366,8 +366,7 @@ DownloadMain::receive_tracker_success() {
   if (!info()->is_active())
     return;
 
-  priority_queue_erase(&taskScheduler, &m_taskTrackerRequest);
-  priority_queue_insert(
+  priority_queue_upsert(
     &taskScheduler,
     &m_taskTrackerRequest,
     (cachedTime + utils::timer::from_seconds(10)).round_seconds());
