@@ -13,6 +13,12 @@ config_setting(
     visibility = ["//visibility:private"],
 )
 
+config_setting(
+    name = "dbg",
+    values = {"compilation_mode": "dbg"},
+    visibility = ["//visibility:private"],
+)
+
 COPTS = [
     "-std=c++17",
     "-Wall",
@@ -25,6 +31,9 @@ COPTS = [
         "-Ofast",
         "-flto",
     ],
+    "//:dbg": [
+        "-g",
+    ],
     "//conditions:default": [],
 })
 
@@ -32,6 +41,11 @@ LINKOPTS = select({
     "//:opt": [
         "-O3",
         "-flto",
+    ],
+    "//:dbg": [
+        "-fno-omit-frame-pointer",
+        "-mno-omit-leaf-frame-pointer",
+        "-g",
     ],
     "//conditions:default": [],
 })
