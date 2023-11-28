@@ -232,7 +232,7 @@ DownloadWrapper::receive_hash_done(ChunkHandle handle, const char* hash) {
         finished_download();
 
       } else if (was_partial && data()->wanted_chunks() == 0) {
-        priority_queue_erase(&taskScheduler, &m_main->delay_partially_done());
+        priority_queue_erase(&taskScheduler, &m_main->delay_partially_restarted());
         priority_queue_upsert(
           &taskScheduler, &m_main->delay_partially_done(), cachedTime);
       }
