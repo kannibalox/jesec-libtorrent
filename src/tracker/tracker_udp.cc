@@ -278,8 +278,7 @@ TrackerUdp::event_read() {
 
       prepare_announce_input();
 
-      priority_queue_erase(&taskScheduler, &m_taskTimeout);
-      priority_queue_insert(&taskScheduler,
+      priority_queue_upsert(&taskScheduler,
                             &m_taskTimeout,
                             (cachedTime + utils::timer::from_seconds(
                                             m_parent->info()->udp_timeout()))

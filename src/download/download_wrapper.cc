@@ -400,15 +400,16 @@ DownloadWrapper::receive_update_priorities() {
   // download is active and not completed.
   if (info()->is_active() && !file_list()->is_done() &&
       was_partial != (data()->wanted_chunks() != 0)) {
-    priority_queue_erase(&taskScheduler, &m_main->delay_partially_done());
-    priority_queue_erase(&taskScheduler, &m_main->delay_partially_restarted());
 
-    if (was_partial)
-      priority_queue_insert(
+    if (was_partial) {
+      priority_queue_erase(&taskScheduler, &m_main->delay_partially_restarted());
+      priority_queue_upsert(
         &taskScheduler, &m_main->delay_partially_done(), cachedTime);
-    else
-      priority_queue_insert(
+    } else {
+      priority_queue_erase(&taskScheduler, &m_main->delay_partially_done());
+      priority_queue_upsert(
         &taskScheduler, &m_main->delay_partially_restarted(), cachedTime);
+    }
   }
 }
 

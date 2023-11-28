@@ -205,8 +205,7 @@ HashTorrent::queue(bool quick) {
         quick,
         m_errno,
         handle.error_number().message().c_str());
-      utils::priority_queue_erase(&taskScheduler, &m_delayChecked);
-      utils::priority_queue_insert(&taskScheduler, &m_delayChecked, cachedTime);
+      utils::priority_queue_upsert(&taskScheduler, &m_delayChecked, cachedTime);
       return;
     }
 
@@ -229,10 +228,9 @@ HashTorrent::queue(bool quick) {
     LT_LOG_THIS(
       INFO, "Completed (normal): position:%u try_quick:%u.", m_position, quick);
 
-    // Erase the scheduled item just to make sure that if hashing is
+    // Update the scheduled item just to make sure that if hashing is
     // started again during the delay it won't cause an exception.
-    utils::priority_queue_erase(&taskScheduler, &m_delayChecked);
-    utils::priority_queue_insert(&taskScheduler, &m_delayChecked, cachedTime);
+    utils::priority_queue_upsert(&taskScheduler, &m_delayChecked, cachedTime);
   }
 }
 

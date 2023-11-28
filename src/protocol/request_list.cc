@@ -165,19 +165,19 @@ void
 RequestList::unchoked() {
   m_last_unchoke = cachedTime;
 
-  priority_queue_erase(&taskScheduler, &m_delay_remove_choked);
-
   // Clear choked queue if the peer doesn't start sending previously
   // requested pieces.
   //
   // This handles the case where a peer does a choke immediately
   // followed unchoke before starting to send pieces.
   if (!m_queues.queue_empty(bucket_choked)) {
-    priority_queue_insert(
+    priority_queue_upsert(
       &taskScheduler,
       &m_delay_remove_choked,
       (cachedTime + utils::timer::from_seconds(timeout_remove_choked))
         .round_seconds());
+  } else {
+    priority_queue_erase(&taskScheduler, &m_delay_remove_choked);
   }
 }
 
@@ -278,8 +278,7 @@ RequestList::downloading(const Piece& piece) {
 
       // We make sure that the choked queue eventually gets cleared if
       // the peer has skipped sending some pieces from the choked queue.
-      priority_queue_erase(&taskScheduler, &m_delay_remove_choked);
-      priority_queue_insert(
+      priority_queue_upsert(
         &taskScheduler,
         &m_delay_remove_choked,
         (cachedTime + utils::timer::from_seconds(timeout_choked_received))
