@@ -696,17 +696,17 @@ FileList::iterator
 FileList::inc_completed(iterator firstItr, uint32_t index) {
   firstItr = std::find_if(
     firstItr, end(), [index](File* f) { return index < f->range_second(); });
-  auto lastItr = std::find_if(firstItr, end(), [index](File* f) {
-    return (index + 1) < f->range_second();
-  });
 
   if (firstItr == end())
     throw internal_error(
       "FileList::inc_completed() first == m_entryList->end().", data()->hash());
 
-  // TODO: Check if this works right for zero-length files.
+  uint64_t boundary = (index+1)*m_chunkSize;
+  auto lastItr = std::find_if(firstItr, end(), [boundary](File* f) {
+    return (boundary <= f->offset_end());
+  });
   std::for_each(firstItr,
-                lastItr == end() ? end() : (lastItr + 1),
+                lastItr == end() ? end() : lastItr + 1,
                 std::mem_fn(&File::inc_completed_protected));
 
   return lastItr;

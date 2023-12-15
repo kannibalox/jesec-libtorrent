@@ -62,6 +62,10 @@ public:
     return m_offset;
   }
 
+  uint64_t offset_end() const {
+    return m_offset + m_size;
+  }
+
   uint64_t size_bytes() const {
     return m_size;
   }
