@@ -422,10 +422,12 @@ PeerConnectionMetadata::try_request_metadata_pieces() {
   if (!m_up->can_write_extension() || m_extensions->has_pending_message())
     return false;
 
-  const Piece* p = request_list()->delegate();
+  std::vector<const Piece*> pieces = request_list()->delegate(1);
 
-  if (p == nullptr)
+  if (pieces.empty())
     return false;
+
+  const Piece* p = pieces.front();
 
   if (!m_download->file_list()->is_valid_piece(*p) ||
       !m_peerChunks.bitfield()->get(p->index()))

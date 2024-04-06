@@ -33,7 +33,9 @@ public:
     return &m_transfers;
   }
 
-  BlockTransfer* delegate(PeerChunks* peerChunks, int affinity);
+  std::vector<BlockTransfer*> delegate(PeerChunks* peerChunks,
+                                       uint32_t    affinity,
+                                       uint32_t    maxPieces);
 
   bool get_aggressive() {
     return m_aggressive;
@@ -50,15 +52,17 @@ public:
   }
 
   // Don't call this from the outside.
-  Block* delegate_piece(BlockList* c, const PeerInfo* peerInfo);
-  Block* delegate_aggressive(BlockList*      c,
-                             uint16_t*       overlapped,
-                             const PeerInfo* peerInfo);
+  void delegate_from_blocklist(BlockList*                   c,
+                               PeerInfo*                    peerInfo,
+                               std::vector<BlockTransfer*>& transfers,
+                               uint32_t                     maxPieces);
+  void delegate_new_chunks(PeerChunks*                  pc,
+                           std::vector<BlockTransfer*>& transfers,
+                           uint32_t                     maxPieces,
+                           bool                         highPriority);
 
 private:
-  // Start on a new chunk, returns .end() if none possible. bf is
-  // remote peer's bitfield.
-  Block* new_chunk(PeerChunks* pc, bool highPriority);
+  BlockList* new_chunklist(PeerChunks* pc, bool highPriority);
 
   Block* delegate_seeder(PeerChunks* peerChunks);
 

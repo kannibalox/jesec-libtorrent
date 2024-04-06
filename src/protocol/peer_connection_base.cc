@@ -1059,29 +1059,31 @@ PeerConnectionBase::try_request_pieces() {
 
   while (request_list()->queued_size() < pipeSize &&
          m_up->can_write_request()) {
+    // It should get the right number the first time around, but loop just to be
+    // sure
+    int maxRequests = m_up->max_write_request();
+    int maxQueued   = pipeSize - request_list()->queued_size();
+    int maxPieces   = std::max(std::min(maxRequests, maxQueued), 1);
 
-    // Delegator should return a vector of pieces, and it should be
-    // passed the number of pieces it should delegate. Try to ensure
-    // it receives large enough request to fill a whole chunk if the
-    // peer is fast enough.
+    std::vector<const Piece*> pieces = request_list()->delegate(maxPieces);
 
-    const Piece* p = request_list()->delegate();
+    if (pieces.empty()) {
+      return false;
+    }
 
-    if (p == nullptr)
-      break;
+    for (auto& p : pieces) {
+      if (!m_download->file_list()->is_valid_piece(*p) ||
+          !m_peerChunks.bitfield()->get(p->index()))
+        throw internal_error("PeerConnectionBase::try_request_pieces() tried "
+                             "to use an invalid piece.");
 
-    if (!m_download->file_list()->is_valid_piece(*p) ||
-        !m_peerChunks.bitfield()->get(p->index()))
-      throw internal_error("PeerConnectionBase::try_request_pieces() tried to "
-                           "use an invalid piece.");
-
-    m_up->write_request(*p);
-
-    LT_LOG_PIECE_EVENTS("(down) requesting %" PRIu32 " %" PRIu32 " %" PRIu32,
-                        p->index(),
-                        p->offset(),
-                        p->length());
-    success = true;
+      m_up->write_request(*p);
+      LT_LOG_PIECE_EVENTS("(down) requesting %" PRIu32 " %" PRIu32 " %" PRIu32,
+                          p->index(),
+                          p->offset(),
+                          p->length());
+      success = true;
+    }
   }
 
   return success;

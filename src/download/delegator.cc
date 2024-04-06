@@ -1,12 +1,44 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
-// Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
+// libTorrent - BitTorrent library
+// Copyright (C) 2005-2011, Jari Sundell
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// In addition, as a special exception, the copyright holders give
+// permission to link the code of portions of this program with the
+// OpenSSL library under certain conditions as described in each
+// individual source file, and distribute linked combinations
+// including the two.
+//
+// You must obey the GNU General Public License in all respects for
+// all of the code used other than OpenSSL.  If you modify file(s)
+// with this exception, you may extend this exception to your version
+// of the file(s), but you are not obligated to do so.  If you do not
+// wish to do so, delete this exception statement from your version.
+// If you delete this exception statement from all source files in the
+// program, then also delete it here.
+//
+// Contact:  Jari Sundell <jaris@ifi.uio.no>
+//
+//           Skomakerveien 33
+//           3185 Skoppum, NORWAY
 
 // Fucked up ugly piece of hack, this code.
 
 #include <algorithm>
 #include <cinttypes>
 
-#include "download/delegator.h"
 #include "protocol/peer_chunks.h"
 #include "torrent/bitfield.h"
 #include "torrent/data/block.h"
@@ -14,126 +46,136 @@
 #include "torrent/data/block_transfer.h"
 #include "torrent/exceptions.h"
 
+#include "download/delegator.h"
+
 namespace torrent {
 
-#define DelegatorCheckPriority(THIS, TARGET, PRIORITY, CHUNKS)                 \
-  [THIS, &TARGET, CHUNKS](BlockList* d) {                                      \
-    return PRIORITY == d->priority() && CHUNKS->bitfield()->get(d->index()) && \
-           (TARGET = delegate_piece(d, CHUNKS->peer_info())) != nullptr;       \
-  }
-
-BlockTransfer*
-Delegator::delegate(PeerChunks* peerChunks, int affinity) {
+std::vector<BlockTransfer*>
+Delegator::delegate(PeerChunks* peerChunks,
+                    uint32_t    affinity,
+                    uint32_t    maxPieces) {
   // TODO: Make sure we don't queue the same piece several time on the same peer
   // when it timeout cancels them.
-  Block* target = nullptr;
+  std::vector<BlockTransfer*> new_transfers;
+  PeerInfo*                   peerInfo = peerChunks->peer_info();
 
   // Find piece with same index as affinity. This affinity should ensure that we
   // never start another piece while the chunk this peer used to download is
   // still in progress.
-  //
+
   // TODO: What if the hash failed? Don't want data from that peer again.
-  if (affinity >= 0 &&
-      std::any_of(m_transfers.begin(),
-                  m_transfers.end(),
-                  [this,
-                   &target,
-                   affinity = static_cast<unsigned int>(affinity),
-                   peerInfo = peerChunks->peer_info()](BlockList* d) {
-                    return affinity == d->index() &&
-                           (target = delegate_piece(d, peerInfo)) != nullptr;
-                  })) {
-    return target->insert(peerChunks->peer_info());
+  if (affinity >= 0) {
+    for (BlockList* itr : m_transfers) {
+      if (new_transfers.size() >= maxPieces)
+        return new_transfers;
+      if (affinity == itr->index())
+        delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
+    }
   }
 
-  if (peerChunks->is_seeder() &&
-      (target = delegate_seeder(peerChunks)) != nullptr) {
-    return target->insert(peerChunks->peer_info());
+  // Prioritize full seeders
+  if (peerChunks->is_seeder()) {
+    for (BlockList* itr : m_transfers) {
+      if (new_transfers.size() >= maxPieces)
+        return new_transfers;
+      if (itr->by_seeder())
+        delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
+    }
+    // Create new high priority pieces.
+    delegate_new_chunks(peerChunks, new_transfers, maxPieces, true);
+    // Create new normal priority pieces.
+    delegate_new_chunks(peerChunks, new_transfers, maxPieces, false);
+  }
+  if (new_transfers.size() >= maxPieces)
+    return new_transfers;
+
+  // Find existing high priority pieces.
+  for (BlockList* itr : m_transfers) {
+    if (new_transfers.size() >= maxPieces)
+      return new_transfers;
+    if (itr->priority() == PRIORITY_HIGH &&
+        peerChunks->bitfield()->get(itr->index()))
+      delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
   }
 
-  // High priority pieces.
-  if (std::any_of(
-        m_transfers.begin(),
-        m_transfers.end(),
-        DelegatorCheckPriority(this, target, PRIORITY_HIGH, peerChunks))) {
-    return target->insert(peerChunks->peer_info());
+  // Create new high priority pieces.
+  delegate_new_chunks(peerChunks, new_transfers, maxPieces, true);
+
+  // Find existing normal priority pieces.
+  for (BlockList* itr : m_transfers) {
+    if (new_transfers.size() >= maxPieces)
+      return new_transfers;
+    if (itr->priority() == PRIORITY_NORMAL &&
+        peerChunks->bitfield()->get(itr->index()))
+      delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
   }
 
-  // Find normal priority pieces.
-  if ((target = new_chunk(peerChunks, true))) {
-    return target->insert(peerChunks->peer_info());
-  }
+  // Create new normal priority pieces.
+  delegate_new_chunks(peerChunks, new_transfers, maxPieces, false);
 
-  // Normal priority pieces.
-  if (std::any_of(
-        m_transfers.begin(),
-        m_transfers.end(),
-        DelegatorCheckPriority(this, target, PRIORITY_NORMAL, peerChunks))) {
-    return target->insert(peerChunks->peer_info());
-  }
-
-  if ((target = new_chunk(peerChunks, false))) {
-    return target->insert(peerChunks->peer_info());
-  }
-
-  if (!m_aggressive) {
-    return nullptr;
-  }
+  if (!m_aggressive)
+    return new_transfers;
 
   // Aggressive mode, look for possible downloads that already have
   // one or more queued.
 
   // No more than 4 per piece.
   uint16_t overlapped = 5;
-
-  // TODO: Should this ensure we don't download pieces that are priority off?
-  for (const auto& blockList : m_transfers) {
-    Block* tmp;
-
-    if (!peerChunks->bitfield()->get(blockList->index()) ||
-        blockList->priority() == PRIORITY_OFF ||
-        (tmp = delegate_aggressive(
-           blockList, &overlapped, peerChunks->peer_info())) == nullptr) {
-      continue;
+  for (BlockList* itr : m_transfers) {
+    if (new_transfers.size() >= maxPieces)
+      return new_transfers;
+    if (peerChunks->bitfield()->get(itr->index()) &&
+        itr->priority() != PRIORITY_OFF) {
+      for (auto bl_itr = itr->begin(); bl_itr != itr->end() && overlapped != 0;
+           bl_itr++) {
+        if (new_transfers.size() >= maxPieces ||
+            bl_itr->size_not_stalled() >= overlapped)
+          break;
+        if (!bl_itr->is_finished() && bl_itr->find(peerInfo) == NULL) {
+          new_transfers.push_back(bl_itr->insert(peerInfo));
+          overlapped = bl_itr->size_not_stalled();
+        }
+      }
     }
-
-    target = tmp;
   }
 
-  return target ? target->insert(peerChunks->peer_info()) : nullptr;
+  return new_transfers;
 }
 
-Block*
-Delegator::delegate_seeder(PeerChunks* peerChunks) {
-  Block* target = nullptr;
+void
+Delegator::delegate_new_chunks(PeerChunks*                  pc,
+                               std::vector<BlockTransfer*>& transfers,
+                               uint32_t                     maxPieces,
+                               bool                         highPriority) {
+  // Find new chunks and if successfull, add all possible pieces into
+  // `transfers`
+  while (transfers.size() < maxPieces) {
+    uint32_t index = m_slot_chunk_find(pc, highPriority);
 
-  if (std::any_of(
-        m_transfers.begin(),
-        m_transfers.end(),
-        [this, &target, peerInfo = peerChunks->peer_info()](BlockList* d) {
-          return d->by_seeder() &&
-                 (target = delegate_piece(d, peerInfo)) != nullptr;
-        })) {
-    return target;
+    if (index == ~(uint32_t)0)
+      return;
+
+    TransferList::iterator itr =
+      m_transfers.insert(Piece(index, 0, m_slot_chunk_size(index)), block_size);
+
+    (*itr)->set_by_seeder(pc->is_seeder());
+
+    if (highPriority)
+      (*itr)->set_priority(PRIORITY_HIGH);
+    else
+      (*itr)->set_priority(PRIORITY_NORMAL);
+    delegate_from_blocklist(*itr, pc->peer_info(), transfers, maxPieces);
   }
-
-  if ((target = new_chunk(peerChunks, true)))
-    return target;
-
-  if ((target = new_chunk(peerChunks, false)))
-    return target;
-
-  return nullptr;
 }
 
-Block*
-Delegator::new_chunk(PeerChunks* pc, bool highPriority) {
+BlockList*
+Delegator::new_chunklist(PeerChunks* pc, bool highPriority) {
   uint32_t index = m_slot_chunk_find(pc, highPriority);
 
   if (index == ~(uint32_t)0)
-    return nullptr;
+    return NULL;
 
-  auto itr =
+  TransferList::iterator itr =
     m_transfers.insert(Piece(index, 0, m_slot_chunk_size(index)), block_size);
 
   (*itr)->set_by_seeder(pc->is_seeder());
@@ -143,46 +185,35 @@ Delegator::new_chunk(PeerChunks* pc, bool highPriority) {
   else
     (*itr)->set_priority(PRIORITY_NORMAL);
 
-  return &*(*itr)->begin();
+  return *itr;
 }
 
-Block*
-Delegator::delegate_piece(BlockList* blockList, const PeerInfo* peerInfo) {
-  Block* p = nullptr;
+void
+Delegator::delegate_from_blocklist(BlockList*                   c,
+                                   PeerInfo*                    peerInfo,
+                                   std::vector<BlockTransfer*>& transfers,
+                                   uint32_t                     maxPieces) {
+  std::vector<Block*> blocks;
 
-  for (auto& block : *blockList) {
-    if (block.is_finished() || !block.is_stalled())
-      continue;
+  for (auto i = c->begin(); i != c->end(); ++i) {
+    if (transfers.size() >= maxPieces)
+      return;
+    // If not finished or stalled, and no one is downloading this, then assign
+    if (!(i->is_finished() || !i->is_stalled()) && i->size_all() == 0)
+      transfers.push_back(i->insert(peerInfo));
+  }
+  if (transfers.size() >= maxPieces)
+    return;
 
-    if (block.size_all() == 0) {
-      // No one is downloading this, assign.
-      return &block;
-
-    } else if (p == nullptr && block.find(peerInfo) == nullptr) {
-      // Stalled but we really want to finish this piece. Check 'p' so
-      // that we don't end up queuing the pieces in reverse.
-      p = &block;
+  // Fill any remaining slots with potentially stalled pieces.
+  // Use a reverse iterator to emulate the previous behavior of the singular
+  // `delegate_piece`
+  for (auto i = c->rbegin(); i != c->rend() && transfers.size() < maxPieces;
+       ++i) {
+    if (!(i->is_finished() || !i->is_stalled()) && i->find(peerInfo) == NULL) {
+      transfers.push_back(i->insert(peerInfo));
     }
   }
-
-  return p;
-}
-
-Block*
-Delegator::delegate_aggressive(BlockList*      c,
-                               uint16_t*       overlapped,
-                               const PeerInfo* peerInfo) {
-  Block* p = nullptr;
-
-  for (BlockList::iterator i = c->begin(); i != c->end() && *overlapped != 0;
-       ++i)
-    if (!i->is_finished() && i->size_not_stalled() < *overlapped &&
-        i->find(peerInfo) == nullptr) {
-      p           = &*i;
-      *overlapped = i->size_not_stalled();
-    }
-
-  return p;
 }
 
 } // namespace torrent

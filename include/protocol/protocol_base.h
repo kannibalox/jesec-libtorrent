@@ -144,6 +144,10 @@ public:
     return m_buffer.reserved_left() >= sizeof_extension;
   }
 
+  size_type max_write_request() const {
+    return m_buffer.reserved_left() >= sizeof_request;
+  }
+
   bool can_read_have_body() const {
     return m_buffer.remaining() >= sizeof_have_body;
   }

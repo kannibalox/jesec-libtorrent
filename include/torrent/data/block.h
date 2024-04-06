@@ -128,10 +128,11 @@ public:
   // block == NULL.
   static void release(BlockTransfer* transfer);
 
-private:
-  Block(const Block&) = delete;
+  Block(const Block&)          = delete;
   void operator=(const Block&) = delete;
+  Block(Block&&)               = default;
 
+private:
   void invalidate_transfer(BlockTransfer* transfer) LIBTORRENT_NO_EXPORT;
 
   void remove_erased_transfers() LIBTORRENT_NO_EXPORT;

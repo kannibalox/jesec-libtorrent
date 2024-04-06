@@ -5,6 +5,7 @@
 #define LIBTORRENT_REQUEST_LIST_H
 
 #include <deque>
+#include <vector>
 
 #include "torrent/data/block_transfer.h"
 #include "utils/instrumentation.h"
@@ -52,7 +53,7 @@ public:
 
   // Some parameters here, like how fast we are downloading and stuff
   // when we start considering those.
-  const Piece* delegate();
+  std::vector<const Piece*> delegate(uint32_t maxPieces);
 
   void stall_initial();
   void stall_prolonged();

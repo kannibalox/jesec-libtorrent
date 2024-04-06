@@ -35,8 +35,8 @@ transfer_list_completed(torrent::TransferList* transfer_list, uint32_t index) {
 #define SETUP_DELEGATOR(fpc_prefix)                                            \
   torrent::Delegator* delegator = new torrent::Delegator;                      \
   delegator->slot_chunk_find()  = std::bind(&fpc_prefix##_find_peer_chunk,     \
-                                           std::placeholders::_1,             \
-                                           std::placeholders::_2);            \
+                                            std::placeholders::_1,             \
+                                            std::placeholders::_2);            \
   delegator->slot_chunk_size() =                                               \
     std::bind(&chunk_index_size, std::placeholders::_1);                       \
   delegator->transfer_list()->slot_canceled() =                                \
@@ -73,9 +73,9 @@ transfer_list_completed(torrent::TransferList* transfer_list, uint32_t index) {
 
 #define SETUP_ALL_WITH_3(fpc_prefix)                                           \
   SETUP_ALL(fpc_prefix);                                                       \
-  const torrent::Piece* piece_1 = request_list->delegate();                    \
-  const torrent::Piece* piece_2 = request_list->delegate();                    \
-  const torrent::Piece* piece_3 = request_list->delegate();                    \
+  const torrent::Piece* piece_1 = request_list->delegate(1).front();           \
+  const torrent::Piece* piece_2 = request_list->delegate(1).front();           \
+  const torrent::Piece* piece_3 = request_list->delegate(1).front();           \
   ASSERT_TRUE(piece_1);                                                        \
   ASSERT_TRUE(piece_2);                                                        \
   ASSERT_TRUE(piece_3);
@@ -143,7 +143,7 @@ TEST_F(TestRequestList, test_basic) {
 TEST_F(TestRequestList, test_single_request) {
   SETUP_ALL(basic);
 
-  const torrent::Piece* piece = request_list->delegate();
+  const torrent::Piece* piece = request_list->delegate(1).front();
   // std::cout << piece->index() << ' ' << piece->offset() << ' ' <<
   // piece->length() << std::endl; std::cout << peer_info->transfer_counter() <<
   // std::endl;
@@ -167,7 +167,7 @@ TEST_F(TestRequestList, test_single_request) {
 TEST_F(TestRequestList, test_single_canceled) {
   SETUP_ALL(basic);
 
-  const torrent::Piece* piece = request_list->delegate();
+  const torrent::Piece* piece = request_list->delegate(1).front();
   // std::cout << piece->index() << ' ' << piece->offset() << ' ' <<
   // piece->length() << std::endl; std::cout << peer_info->transfer_counter() <<
   // std::endl;

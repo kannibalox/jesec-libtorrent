@@ -11,90 +11,24 @@
 
 namespace torrent {
 
-// Temporary workaround until we can use C++11's std::vector::emblace_back.
-template<typename Type>
-class no_copy_vector {
+class LIBTORRENT_EXPORT BlockList : public std::vector<Block> {
 public:
-  using value_type      = Type;
-  using size_type       = size_t;
-  using reference       = value_type&;
-  using difference_type = ptrdiff_t;
-
-  using iterator       = value_type*;
-  using const_iterator = const value_type*;
-
-  no_copy_vector() = default;
-  ~no_copy_vector() {
-    clear();
-  }
-
-  size_type size() const {
-    return m_size;
-  }
-  bool empty() const {
-    return m_size == 0;
-  }
-
-  void resize(size_type s) {
-    clear();
-    m_size   = s;
-    m_values = new value_type[s];
-  }
-
-  void clear() {
-    delete[] m_values;
-    m_values = nullptr;
-    m_size   = 0;
-  }
-
-  iterator begin() {
-    return m_values;
-  }
-  const_iterator begin() const {
-    return m_values;
-  }
-
-  iterator end() {
-    return m_values + m_size;
-  }
-  const_iterator end() const {
-    return m_values + m_size;
-  }
-
-  value_type& back() {
-    return *(m_values + m_size - 1);
-  }
-
-  value_type& operator[](size_type idx) {
-    return m_values[idx];
-  }
-
-private:
-  no_copy_vector(const no_copy_vector&) = delete;
-  void operator=(const no_copy_vector&) = delete;
-
-  size_type m_size{ 0 };
-  Block*    m_values{ nullptr };
-};
-
-class LIBTORRENT_EXPORT BlockList : public no_copy_vector<Block> {
-public:
-  using base_type = no_copy_vector<Block>;
+  using base_type = std::vector<Block>;
   using size_type = uint32_t;
 
   using base_type::difference_type;
   using base_type::reference;
   using base_type::value_type;
 
-  using base_type::iterator;
-  // using base_type::reverse_iterator;
   using base_type::empty;
+  using base_type::iterator;
+  using base_type::reverse_iterator;
   using base_type::size;
 
   using base_type::begin;
   using base_type::end;
-  // using base_type::rbegin;
-  // using base_type::rend;
+  using base_type::rbegin;
+  using base_type::rend;
 
   using base_type::operator[];
 
@@ -160,7 +94,7 @@ public:
   void do_all_failed();
 
 private:
-  BlockList(const BlockList&) = delete;
+  BlockList(const BlockList&)      = delete;
   void operator=(const BlockList&) = delete;
 
   Piece      m_piece;
