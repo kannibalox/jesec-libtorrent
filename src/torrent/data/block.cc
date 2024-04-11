@@ -57,8 +57,7 @@ Block::~Block() {
 BlockTransfer*
 Block::insert(PeerInfo* peerInfo) {
   if (find_queued(peerInfo) || find_transfer(peerInfo))
-    throw internal_error(
-      "Block::insert(...) find_queued(peerInfo) || find_transfer(peerInfo).");
+    return nullptr;
 
   m_notStalled++;
 

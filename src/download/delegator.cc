@@ -211,7 +211,9 @@ Delegator::delegate_from_blocklist(BlockList*                   c,
   for (auto i = c->rbegin(); i != c->rend() && transfers.size() < maxPieces;
        ++i) {
     if (!(i->is_finished() || !i->is_stalled()) && i->find(peerInfo) == NULL) {
-      transfers.push_back(i->insert(peerInfo));
+      BlockTransfer* inserted_info = i->insert(peerInfo);
+      if (inserted_info != nullptr)
+        transfers.push_back(inserted_info);
     }
   }
 }
