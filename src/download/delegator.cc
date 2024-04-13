@@ -179,7 +179,7 @@ Delegator::delegate_from_blocklist(std::vector<BlockTransfer*>& transfers,
     if (transfers.size() >= maxPieces)
       return;
     // If not finished or stalled, and no one is downloading this, then assign
-    if (!(i->is_finished() || !i->is_stalled()) && i->size_all() == 0)
+    if (!i->is_finished() && i->is_stalled() && i->size_all() == 0)
       transfers.push_back(i->insert(peerInfo));
   }
   if (transfers.size() >= maxPieces)
@@ -188,7 +188,7 @@ Delegator::delegate_from_blocklist(std::vector<BlockTransfer*>& transfers,
   // Fill any remaining slots with potentially stalled pieces.
   for (auto i = c->begin(); i != c->end() && transfers.size() < maxPieces;
        ++i) {
-    if (!(i->is_finished() || !i->is_stalled()) && i->find(peerInfo) == NULL) {
+    if (!i->is_finished() && i->is_stalled()) {
       BlockTransfer* inserted_info = i->insert(peerInfo);
       if (inserted_info != nullptr)
         transfers.push_back(inserted_info);
