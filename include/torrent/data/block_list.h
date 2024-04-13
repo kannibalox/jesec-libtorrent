@@ -22,13 +22,10 @@ public:
 
   using base_type::empty;
   using base_type::iterator;
-  using base_type::reverse_iterator;
   using base_type::size;
 
   using base_type::begin;
   using base_type::end;
-  using base_type::rbegin;
-  using base_type::rend;
 
   using base_type::operator[];
 

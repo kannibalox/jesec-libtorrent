@@ -52,13 +52,13 @@ public:
   }
 
   // Don't call this from the outside.
-  void delegate_from_blocklist(BlockList*                   c,
-                               PeerInfo*                    peerInfo,
-                               std::vector<BlockTransfer*>& transfers,
-                               uint32_t                     maxPieces);
-  void delegate_new_chunks(PeerChunks*                  pc,
-                           std::vector<BlockTransfer*>& transfers,
+  void delegate_from_blocklist(std::vector<BlockTransfer*>& transfers,
+                               uint32_t                     maxPieces,
+                               BlockList*                   c,
+                               PeerInfo*                    peerInfo);
+  void delegate_new_chunks(std::vector<BlockTransfer*>& transfers,
                            uint32_t                     maxPieces,
+                           PeerChunks*                  pc,
                            bool                         highPriority);
 
 private:

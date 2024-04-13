@@ -69,7 +69,7 @@ Delegator::delegate(PeerChunks* peerChunks,
       if (new_transfers.size() >= maxPieces)
         return new_transfers;
       if (affinity == itr->index())
-        delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
+        delegate_from_blocklist(new_transfers, maxPieces, itr, peerInfo);
     }
   }
 
@@ -79,12 +79,12 @@ Delegator::delegate(PeerChunks* peerChunks,
       if (new_transfers.size() >= maxPieces)
         return new_transfers;
       if (itr->by_seeder())
-        delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
+        delegate_from_blocklist(new_transfers, maxPieces, itr, peerInfo);
     }
     // Create new high priority pieces.
-    delegate_new_chunks(peerChunks, new_transfers, maxPieces, true);
+    delegate_new_chunks(new_transfers, maxPieces, peerChunks, true);
     // Create new normal priority pieces.
-    delegate_new_chunks(peerChunks, new_transfers, maxPieces, false);
+    delegate_new_chunks(new_transfers, maxPieces, peerChunks, false);
   }
   if (new_transfers.size() >= maxPieces)
     return new_transfers;
@@ -95,11 +95,11 @@ Delegator::delegate(PeerChunks* peerChunks,
       return new_transfers;
     if (itr->priority() == PRIORITY_HIGH &&
         peerChunks->bitfield()->get(itr->index()))
-      delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
+      delegate_from_blocklist(new_transfers, maxPieces, itr, peerInfo);
   }
 
   // Create new high priority pieces.
-  delegate_new_chunks(peerChunks, new_transfers, maxPieces, true);
+  delegate_new_chunks(new_transfers, maxPieces, peerChunks, true);
 
   // Find existing normal priority pieces.
   for (BlockList* itr : m_transfers) {
@@ -107,11 +107,11 @@ Delegator::delegate(PeerChunks* peerChunks,
       return new_transfers;
     if (itr->priority() == PRIORITY_NORMAL &&
         peerChunks->bitfield()->get(itr->index()))
-      delegate_from_blocklist(itr, peerInfo, new_transfers, maxPieces);
+      delegate_from_blocklist(new_transfers, maxPieces, itr, peerInfo);
   }
 
   // Create new normal priority pieces.
-  delegate_new_chunks(peerChunks, new_transfers, maxPieces, false);
+  delegate_new_chunks(new_transfers, maxPieces, peerChunks, false);
 
   if (!m_aggressive)
     return new_transfers;
@@ -143,9 +143,9 @@ Delegator::delegate(PeerChunks* peerChunks,
 }
 
 void
-Delegator::delegate_new_chunks(PeerChunks*                  pc,
-                               std::vector<BlockTransfer*>& transfers,
+Delegator::delegate_new_chunks(std::vector<BlockTransfer*>& transfers,
                                uint32_t                     maxPieces,
+                               PeerChunks*                  pc,
                                bool                         highPriority) {
   // Find new chunks and if successfull, add all possible pieces into
   // `transfers`
@@ -164,35 +164,15 @@ Delegator::delegate_new_chunks(PeerChunks*                  pc,
       (*itr)->set_priority(PRIORITY_HIGH);
     else
       (*itr)->set_priority(PRIORITY_NORMAL);
-    delegate_from_blocklist(*itr, pc->peer_info(), transfers, maxPieces);
+    delegate_from_blocklist(transfers, maxPieces, *itr, pc->peer_info());
   }
 }
 
-BlockList*
-Delegator::new_chunklist(PeerChunks* pc, bool highPriority) {
-  uint32_t index = m_slot_chunk_find(pc, highPriority);
-
-  if (index == ~(uint32_t)0)
-    return NULL;
-
-  TransferList::iterator itr =
-    m_transfers.insert(Piece(index, 0, m_slot_chunk_size(index)), block_size);
-
-  (*itr)->set_by_seeder(pc->is_seeder());
-
-  if (highPriority)
-    (*itr)->set_priority(PRIORITY_HIGH);
-  else
-    (*itr)->set_priority(PRIORITY_NORMAL);
-
-  return *itr;
-}
-
 void
-Delegator::delegate_from_blocklist(BlockList*                   c,
-                                   PeerInfo*                    peerInfo,
-                                   std::vector<BlockTransfer*>& transfers,
-                                   uint32_t                     maxPieces) {
+Delegator::delegate_from_blocklist(std::vector<BlockTransfer*>& transfers,
+                                   uint32_t                     maxPieces,
+                                   BlockList*                   c,
+                                   PeerInfo*                    peerInfo) {
   std::vector<Block*> blocks;
 
   for (auto i = c->begin(); i != c->end(); ++i) {
@@ -206,9 +186,7 @@ Delegator::delegate_from_blocklist(BlockList*                   c,
     return;
 
   // Fill any remaining slots with potentially stalled pieces.
-  // Use a reverse iterator to emulate the previous behavior of the singular
-  // `delegate_piece`
-  for (auto i = c->rbegin(); i != c->rend() && transfers.size() < maxPieces;
+  for (auto i = c->begin(); i != c->end() && transfers.size() < maxPieces;
        ++i) {
     if (!(i->is_finished() || !i->is_stalled()) && i->find(peerInfo) == NULL) {
       BlockTransfer* inserted_info = i->insert(peerInfo);
