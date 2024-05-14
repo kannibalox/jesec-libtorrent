@@ -131,9 +131,12 @@ Delegator::delegate(PeerChunks* peerChunks,
         if (new_transfers.size() >= maxPieces ||
             bl_itr->size_not_stalled() >= overlapped)
           break;
-        if (!bl_itr->is_finished() && bl_itr->find(peerInfo) == NULL) {
-          new_transfers.push_back(bl_itr->insert(peerInfo));
-          overlapped = bl_itr->size_not_stalled();
+        if (!bl_itr->is_finished()) {
+          BlockTransfer* inserted_info = bl_itr->insert(peerInfo);
+          if (inserted_info != nullptr) {
+            new_transfers.push_back(inserted_info);
+            overlapped = bl_itr->size_not_stalled();
+          }
         }
       }
     }
