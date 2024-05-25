@@ -55,10 +55,10 @@ public:
     return m_time > t;
   }
 
-private:
   priority_item(const priority_item&) = delete;
   void operator=(const priority_item&) = delete;
 
+private:
   timer     m_time;
   slot_void m_slot;
 };
