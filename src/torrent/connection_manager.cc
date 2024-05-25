@@ -2,12 +2,10 @@
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
 #include <sys/types.h>
-#include <utility>
 
 #include "manager.h"
 #include "net/listen.h"
 #include "torrent/connection_manager.h"
-#include "torrent/error.h"
 #include "torrent/exceptions.h"
 #include "torrent/utils/address_info.h"
 #include "torrent/utils/socket_address.h"

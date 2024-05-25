@@ -18,7 +18,6 @@
 
 #include "data/socket_file.h"
 #include "torrent/exceptions.h"
-#include "torrent/utils/error_number.h"
 #include "torrent/utils/file_stat.h"
 
 namespace torrent {

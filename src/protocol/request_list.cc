@@ -1,6 +1,4 @@
 #include <algorithm>
-#include <cinttypes>
-#include <functional>
 
 #include "download/delegator.h"
 #include "protocol/peer_chunks.h"

@@ -1,6 +1,4 @@
 #include <chrono>
-#include <csignal>
-#include <cstring>
 #include <thread>
 
 #include "torrent/exceptions.h"

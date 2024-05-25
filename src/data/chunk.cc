@@ -5,7 +5,6 @@
 #include <csetjmp>
 #include <csignal>
 #include <cstring>
-#include <functional>
 
 #include "data/chunk.h"
 #include "data/chunk_iterator.h"

@@ -1,7 +1,7 @@
 #include "torrent/buildinfo.h"
 
 #include "data/hash_queue.h"
-#include "data/hash_torrent.h"
+
 #include "download/download_constructor.h"
 #include "download/download_wrapper.h"
 #include "manager.h"
@@ -18,7 +18,7 @@
 #include "torrent/poll.h"
 #include "torrent/throttle.h"
 #include "torrent/torrent.h"
-#include "torrent/utils/address_info.h"
+
 #include "torrent/utils/string_manip.h"
 #include "utils/instrumentation.h"
 

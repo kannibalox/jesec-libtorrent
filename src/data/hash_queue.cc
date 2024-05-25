@@ -6,11 +6,8 @@
 #include <thread>
 #include <utility>
 
-#include "data/chunk.h"
-#include "data/chunk_list_node.h"
 #include "data/hash_chunk.h"
 #include "data/hash_queue.h"
-#include "globals.h"
 #include "thread_disk.h"
 #include "torrent/data/download_data.h"
 #include "torrent/exceptions.h"

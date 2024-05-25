@@ -6,7 +6,6 @@
 
 #include "globals.h"
 #include "net/address_list.h"
-#include "torrent/download_info.h"
 #include "torrent/exceptions.h"
 #include "torrent/tracker.h"
 #include "torrent/tracker_list.h"

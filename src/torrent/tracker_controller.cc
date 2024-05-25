@@ -2,7 +2,6 @@
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
 #include "globals.h"
-#include "torrent/download_info.h"
 #include "torrent/exceptions.h"
 #include "torrent/tracker.h"
 #include "torrent/tracker_list.h"

@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
-#include "torrent/buildinfo.h"
 
-#include <cassert>
 
-#include <algorithm>
-#include <stdexcept>
 #include <unistd.h>
 
 #ifdef LT_USE_KQUEUE
@@ -19,11 +15,8 @@
 #include "torrent/event.h"
 #include "torrent/exceptions.h"
 #include "torrent/poll_kqueue.h"
-#include "torrent/torrent.h"
-#include "torrent/utils/error_number.h"
+
 #include "torrent/utils/log.h"
-#include "torrent/utils/thread_base.h"
-#include "torrent/utils/timer.h"
 
 #define LT_LOG_EVENT(event, log_level, log_fmt, ...)                           \
   lt_log_print(LOG_SOCKET_##log_level,                                         \

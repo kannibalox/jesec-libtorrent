@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
-#include <cctype>
-
 #include "torrent/utils/string_manip.h"
 #include "torrent/utils/uri_parser.h"
 

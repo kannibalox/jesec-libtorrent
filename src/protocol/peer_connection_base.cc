@@ -10,7 +10,6 @@
 #include "download/chunk_statistics.h"
 #include "download/download_main.h"
 #include "manager.h"
-#include "net/socket_base.h"
 #include "protocol/extensions.h"
 #include "protocol/peer_connection_base.h"
 #include "torrent/chunk_manager.h"
@@ -25,7 +24,6 @@
 #include "torrent/throttle.h"
 #include "torrent/utils/error_number.h"
 #include "torrent/utils/log.h"
-#include "torrent/utils/string_manip.h"
 #include "utils/instrumentation.h"
 
 #define LT_LOG_PIECE_EVENTS(log_fmt, ...)                                      \

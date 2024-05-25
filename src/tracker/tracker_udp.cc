@@ -18,7 +18,6 @@
 #include "torrent/utils/log.h"
 #include "torrent/utils/option_strings.h"
 #include "torrent/utils/random.h"
-#include "torrent/utils/uri_parser.h"
 #include "tracker/tracker_udp.h"
 
 #define LT_LOG_TRACKER(log_level, log_fmt, ...)                                \

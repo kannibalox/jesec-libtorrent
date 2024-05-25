@@ -2,7 +2,6 @@
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
 #include <cstring>
-#include <limits>
 
 #include "data/chunk_list.h"
 #include "download/available_list.h"
@@ -17,7 +16,6 @@
 #include "protocol/peer_factory.h"
 #include "torrent/data/file_list.h"
 #include "torrent/download.h"
-#include "torrent/download/choke_group.h"
 #include "torrent/download/choke_queue.h"
 #include "torrent/download/download_manager.h"
 #include "torrent/exceptions.h"

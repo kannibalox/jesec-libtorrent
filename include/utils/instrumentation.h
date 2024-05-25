@@ -4,15 +4,11 @@
 #ifndef LIBTORRENT_UTILS_INSTRUMENTATION_H
 #define LIBTORRENT_UTILS_INSTRUMENTATION_H
 
-#include "torrent/buildinfo.h"
 
-#include <algorithm>
 #include <array>
 #include <atomic>
 
-#include "torrent/common.h"
 #include "torrent/utils/cacheline.h"
-#include "torrent/utils/log.h"
 
 namespace torrent {
 

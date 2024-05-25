@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#include "torrent/exceptions.h"
 #include "torrent/http.h"
 #include "torrent/utils/functional.h"
 #include "torrent/utils/log.h"

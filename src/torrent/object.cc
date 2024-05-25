@@ -2,7 +2,6 @@
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
 #include <algorithm>
-#include <cstring>
 
 #include "torrent/object.h"
 #include "torrent/object_stream.h"

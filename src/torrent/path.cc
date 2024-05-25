@@ -3,7 +3,6 @@
 
 #include <algorithm>
 
-#include "torrent/exceptions.h"
 #include "torrent/path.h"
 
 namespace torrent {

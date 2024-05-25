@@ -2,7 +2,6 @@
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
 #include "data/chunk_list.h"
-#include "data/hash_queue.h"
 #include "globals.h"
 #include "torrent/data/download_data.h"
 #include "torrent/exceptions.h"

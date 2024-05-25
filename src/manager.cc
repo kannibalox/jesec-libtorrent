@@ -13,7 +13,6 @@
 #include "torrent/download/choke_queue.h"
 #include "torrent/download/download_manager.h"
 #include "torrent/download/resource_manager.h"
-#include "torrent/exceptions.h"
 #include "torrent/peer/client_list.h"
 #include "torrent/throttle.h"
 #include "utils/instrumentation.h"

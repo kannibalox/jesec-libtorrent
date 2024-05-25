@@ -2,18 +2,14 @@
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
 #include <cstdio>
-#include <sstream>
 
 #include "dht/dht_router.h"
-#include "torrent/connection_manager.h"
 #include "torrent/dht_manager.h"
 #include "torrent/download_info.h"
 #include "torrent/exceptions.h"
 #include "torrent/tracker_list.h"
-#include "torrent/utils/log.h"
 #include "tracker/tracker_dht.h"
 
-#include "globals.h"
 #include "manager.h"
 
 namespace torrent {

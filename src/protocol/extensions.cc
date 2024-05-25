@@ -6,9 +6,7 @@
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>
-#include <limits>
 
-#include "download/available_list.h"
 #include "download/download_main.h"
 #include "download/download_wrapper.h"
 #include "manager.h"

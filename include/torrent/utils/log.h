@@ -5,7 +5,6 @@
 #include <bitset>
 #include <functional>
 #include <string>
-#include <vector>
 
 #include <torrent/common.h>
 

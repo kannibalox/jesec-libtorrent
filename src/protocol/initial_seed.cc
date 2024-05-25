@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
-#include <cstring>
-
 #include "download/chunk_statistics.h"
 #include "protocol/initial_seed.h"
-#include "protocol/peer_connection_leech.h"
+#include "protocol/peer_connection_base.h"
 #include "torrent/download/choke_group.h"
 #include "torrent/download/choke_queue.h"
 

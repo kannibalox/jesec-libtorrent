@@ -4,7 +4,6 @@
 #include "globals.h"
 #include "torrent/exceptions.h"
 #include "torrent/poll.h"
-#include "torrent/utils/log.h"
 #include "torrent/utils/timer.h"
 #include "utils/instrumentation.h"
 

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2005-2011, Jari Sundell <jaris@ifi.uio.no>
 
+#include "torrent/peer/peer_list.h"
+
 #include <algorithm>
-#include <functional>
 
 #include "download/available_list.h"
 #include "globals.h"
@@ -11,7 +12,6 @@
 #include "torrent/exceptions.h"
 #include "torrent/peer/client_list.h"
 #include "torrent/peer/peer_info.h"
-#include "torrent/peer/peer_list.h"
 #include "torrent/utils/log.h"
 #include "torrent/utils/socket_address.h"
 
