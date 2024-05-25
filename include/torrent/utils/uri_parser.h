@@ -46,8 +46,6 @@ struct uri_query_state : public uri_base_state {
 
 void
 uri_parse_str(std::string uri, uri_state& state) LIBTORRENT_EXPORT;
-void
-uri_parse_c_str(const char* uri, uri_state& state) LIBTORRENT_EXPORT;
 
 void
 uri_parse_resource(std::string query, uri_query_state& state) LIBTORRENT_EXPORT;

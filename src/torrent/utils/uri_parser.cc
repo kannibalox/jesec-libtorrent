@@ -114,11 +114,6 @@ uri_parse_success:
   return;
 }
 
-void
-uri_parse_c_str(const char* uri, uri_state& state) {
-  uri_parse_str(std::string(uri), state);
-}
-
 // * Letters (A-Z and a-z), numbers (0-9) and the characters
 //   '.','-','~' and '_' are left as-is
 // * SPACE is encoded as '+' or "%20"
