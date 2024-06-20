@@ -14,6 +14,15 @@ def libtorrent_repos():
 
     maybe(
         http_archive,
+        name = "openssl",
+        #sha256 = "8098a83d7990fb66c73643fc0c933d24a6db77f255179f58d640411e8d07a449",
+        build_file = "@libtorrent//:third_party/openssl.BUILD",
+        strip_prefix = "openssl-3.3.1",
+        urls = ["https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"],
+    )
+
+    maybe(
+        http_archive,
         name = "zlib",
         build_file = "@libtorrent//:third_party/zlib.BUILD",
         sha256 = "8258b75a72303b661a238047cb348203d88d9dddf85d480ed885f375916fcab6",

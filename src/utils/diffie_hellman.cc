@@ -7,6 +7,7 @@
 
 namespace torrent {
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 static void
 dh_free(void* dh) {
   DH_free(reinterpret_cast<DH*>(dh));
